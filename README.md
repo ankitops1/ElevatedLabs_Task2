@@ -122,7 +122,7 @@ All DELETE operations are *safe-mode compatible* — using WHERE with primary ke
 
 ---
 
-## 📂 File Structure (if submitting on GitHub or as a project folder)
+
 
 
 
