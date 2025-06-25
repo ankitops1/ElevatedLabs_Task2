@@ -1,63 +1,113 @@
-CREATE DATABASE IF NOT EXISTS StudentCourseDB;
-USE StudentCourseDB;
+CREATE DATABASE EcommerceDB;
+USE EcommerceDB;
 
-DROP TABLE IF EXISTS Enrollments;
-DROP TABLE IF EXISTS Students;
-DROP TABLE IF EXISTS Courses;
+DROP TABLE IF EXISTS Payments;
+DROP TABLE IF EXISTS Order_Items;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Customers;
 
-CREATE TABLE Students (
-    student_id INT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
-    phone VARCHAR(15)
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(15),
+    address TEXT
 );
 
-CREATE TABLE Courses (
-    course_id INT PRIMARY KEY,
-    course_name VARCHAR(100) NOT NULL,
-    instructor_name VARCHAR(100)
+CREATE TABLE Products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    description TEXT,
+    price DECIMAL(10, 2),
+    stock_quantity INT
 );
 
-CREATE TABLE Enrollments (
-    enrollment_id INT PRIMARY KEY,
-    student_id INT,
-    course_id INT,
-    enrollment_date DATE,
-    grade CHAR(2),
-    FOREIGN KEY (student_id) REFERENCES Students(student_id),
-    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    order_date DATE,
+    total_amount DECIMAL(10, 2),
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
 );
 
-INSERT INTO Students (student_id, name, email, phone) VALUES
-(1, 'ankit', 'ankit@gmail.com', '9876543210'),
-(2, 'shruti', NULL, '9123456780'),
-(3, 'ansh', 'charlie@example.com', NULL),
-(4, 'tanshu', NULL, NULL);
+CREATE TABLE Order_Items (
+    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    price_at_purchase DECIMAL(10, 2),
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
 
-INSERT INTO Courses (course_id, course_name, instructor_name) VALUES
-(101, 'Mathematics', 'Dr. Alpana'),
-(102, 'Physics', NULL),
-(103, 'Chemistry', 'Dr. Meera'),
-(104, 'English Literature', NULL);
+CREATE TABLE Payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    payment_date DATE,
+    amount_paid DECIMAL(10, 2),
+    payment_method VARCHAR(50),
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+);
 
-INSERT INTO Enrollments (enrollment_id, student_id, course_id, enrollment_date, grade) VALUES
-(1, 1, 101, '2024-01-10', 'A'),
-(2, 2, 102, '2024-01-12', NULL),
-(3, 3, 103, '2024-01-15', 'B'),
-(4, 4, 101, '2024-01-17', NULL),
-(5, 2, 104, '2024-01-20', 'C');
+INSERT INTO Customers (name, email, phone, address) VALUES 
+('Ankit', 'ankit@example.com', '9876543210', 'Delhi'),
+('shruti', 'shruti@example.com', NULL, 'Mumbai'),
+('tanshu', NULL, '9998887776', 'Bangalore'),
+('janak', 'janak@example.com', '8889990000', NULL);
 
-SET SQL_SAFE_UPDATES = 0;
+INSERT INTO Products (name, description, price, stock_quantity) VALUES 
+('Laptop', '15-inch screen, 8GB RAM', 55000.00, 10),
+('Smartphone', '128GB, 5G-enabled', 25000.00, 0),
+('Headphones', NULL, 1500.00, 50),
+('Wireless Mouse', 'Ergonomic design', 800.00, 20);
 
-UPDATE Students SET email = CONCAT(SUBSTRING_INDEX(name, ' ', 1), '@example.com') WHERE email IS NULL;
-UPDATE Students SET phone = '0000000000' WHERE phone IS NULL;
-UPDATE Courses SET instructor_name = 'TBD' WHERE instructor_name IS NULL;
-UPDATE Enrollments SET grade = 'P' WHERE grade IS NULL;
+INSERT INTO Orders (customer_id, order_date, total_amount) VALUES
+(1, '2024-06-15', 80000.00),
+(2, '2024-06-16', 25000.00),
+(3, '2024-06-17', NULL);
 
-DELETE FROM Students WHERE phone = '0000000000' AND student_id NOT IN (SELECT DISTINCT student_id FROM Enrollments);
-DELETE FROM Enrollments WHERE enrollment_date < '2024-01-01';
+INSERT INTO Order_Items (order_id, product_id, quantity, price_at_purchase) VALUES
+(1, 1, 1, 55000.00),
+(1, 3, 2, 1500.00),
+(2, 2, 1, 25000.00),
+(3, 4, 1, 800.00);
 
-SELECT * FROM Students;
-SELECT * FROM Courses;
-SELECT * FROM Enrollments;
+INSERT INTO Payments (order_id, payment_date, amount_paid, payment_method) VALUES
+(1, '2024-06-15', 58000.00, 'Credit Card'),
+(2, '2024-06-16', NULL, 'UPI'),
+(3, '2024-06-17', 800.00, NULL);
+
+UPDATE Customers
+SET phone = '9123456789'
+WHERE customer_id = 2 AND phone IS NULL;
+
+UPDATE Customers
+SET email = 'charlie.khan@example.com'
+WHERE customer_id = 3 AND email IS NULL;
+
+UPDATE Orders
+SET total_amount = 800.00
+WHERE order_id = 3 AND total_amount IS NULL;
+
+UPDATE Products
+SET description = 'Basic over-ear headphones'
+WHERE product_id = 3 AND description IS NULL;
+
+UPDATE Payments
+SET amount_paid = 25000.00
+WHERE payment_id = 2 AND amount_paid IS NULL;
+
+UPDATE Payments
+SET payment_method = 'Cash'
+WHERE payment_id = 3 AND payment_method IS NULL;
+
+DELETE FROM Orders
+WHERE order_id = 3 AND total_amount IS NULL;
+
+DELETE FROM Customers
+WHERE customer_id = 3 AND email IS NULL;
+
+DELETE FROM Products
+WHERE product_id = 2 AND stock_quantity = 0;
 
